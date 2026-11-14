@@ -7,23 +7,29 @@ class Auth {
   final supa = Supabase.instance.client.auth;
 
   // Login
-  Future<void> login(
+  Future<bool> login(
     String email,
     String password,
     BuildContext context,
   ) async {
     try {
       await supa.signInWithPassword(email: email, password: password);
+      if (!context.mounted) return false;
       customSnakbar(context, 'Success', Colors.green);
+      return true;
     } on AuthException catch (e) {
+      if (!context.mounted) return false;
       customSnakbar(context, e.message, Colors.red);
+      return false;
     } catch (e) {
+      if (!context.mounted) return false;
       customSnakbar(context, 'Failed To Login', Colors.red);
+      return false;
     }
   }
 
   // SignUp
-  Future<void> signup(
+  Future<bool> signup(
     String name,
     String email,
     String city,
@@ -37,24 +43,48 @@ class Auth {
         email: email,
         data: {'name': name, 'city': city, 'region': region},
       );
+
+      if (!context.mounted) return false;
+
       customSnakbar(context, 'Success', Colors.green);
+
+      return true;
     } on AuthException catch (e) {
+      if (!context.mounted) return false;
+
       customSnakbar(context, e.message, Colors.red);
+
+      return false;
     } catch (e) {
-      customSnakbar(context, 'Fialed To SignUp', Colors.red);
+      if (!context.mounted) return false;
+
+      customSnakbar(context, 'Failed To SignUp', Colors.red);
+
+      return false;
     }
   }
 
   // Send Otp
-  Future<void> sendOtp(String email, BuildContext context) async {
+  Future<bool> sendOtp(String email, BuildContext context) async {
     try {
       await supa.resetPasswordForEmail(email);
+      if (!context.mounted) return false;
 
-      customSnakbar(context, 'OTP Sent Successfully', Colors.green);
+      customSnakbar(context, 'Success', Colors.green);
+
+      return true;
     } on AuthException catch (e) {
+      if (!context.mounted) return false;
+
       customSnakbar(context, e.message, Colors.red);
+
+      return false;
     } catch (e) {
+      if (!context.mounted) return false;
+
       customSnakbar(context, 'Failed To Send OTP', Colors.red);
+
+      return false;
     }
   }
 
@@ -79,7 +109,7 @@ class Auth {
     } on AuthException catch (e) {
       customSnakbar(context, e.message, Colors.red);
     } catch (e) {
-      customSnakbar(context, e.toString(), Colors.red);
+      customSnakbar(context, 'Failed To Update Password', Colors.red);
     }
   }
 }

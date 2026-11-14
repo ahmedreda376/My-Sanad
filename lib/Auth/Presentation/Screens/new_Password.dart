@@ -65,6 +65,12 @@ class _NewPasswordState extends State<NewPassword> {
                             children: [
                               //password
                               CustomTextformfield(
+                                validator: (value) {
+                                  if (value == null || value.length < 8) {
+                                    return 'Password must be at least 8 characters';
+                                  }
+                                  return null;
+                                },
                                 isPassword: true,
                                 controller: passController,
                                 bordercolor: AppThemes.redColor,

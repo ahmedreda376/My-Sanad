@@ -102,7 +102,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       CustomTextformfield(
                         controller: emailController,
                         bordercolor: AppThemes.redColor,
-                        icon: Icons.phone_outlined,
+                        icon: Icons.email_outlined,
                         text: AppLocalizations.of(context)!.hintEmail,
                         fillcolor: AppThemes.whiteColor,
                       ),
@@ -141,6 +141,12 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                       SizedBox(height: 10.h),
                       CustomTextformfield(
+                        validator: (value) {
+                          if (value == null || value.length < 8) {
+                            return 'Password must be at least 8 characters';
+                          }
+                          return null;
+                        },
                         isPassword: true,
                         controller: passwordController,
                         bordercolor: AppThemes.redColor,
@@ -197,15 +203,17 @@ class _SignupScreenState extends State<SignupScreen> {
                         );
                         return;
                       }
-                      await Auth().signup(
-                        nameController.text,
-                        emailController.text,
-                        cityController.text,
-                        regionController.text,
+                      bool ok = await Auth().signup(
+                        nameController.text.trim(),
+                        emailController.text.trim(),
+                        cityController.text.trim(),
+                        regionController.text.trim(),
                         passwordController.text,
                         context,
                       );
-                      context.go('/loginUser');
+                      if (ok && mounted) {
+                        context.push('/loginUser');
+                      }
                     }
                   },
                   child: CustomButton(

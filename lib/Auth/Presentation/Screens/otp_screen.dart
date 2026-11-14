@@ -39,50 +39,58 @@ class _OtpScreenState extends State<OtpScreen> {
         ),
 
         body: Center(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              //Email Field
-              Padding(
-                padding: EdgeInsets.all(8.w),
-                child: CustomTextlabel(
-                  text: AppLocalizations.of(context)!.otpMessage,
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.all(8.w),
-                child: Form(
-                  key: globKey,
-                  child: CustomTextformfield(
-                    controller: otpController,
-                    bordercolor: AppThemes.redColor,
-                    text: '384591',
-                    fillcolor: AppThemes.whiteColor,
-                  ),
-                ),
-              ),
-
-              SizedBox(height: 10.h),
-              //  Verify OTP Button
-              GestureDetector(
-                onTap: () async {
-                  if (globKey.currentState!.validate()) {
-                    await Auth().verifyOtp(
-                      widget.email,
-                      otpController.text,
-                      context,
-                    );
-                  }
-                },
-                child: Padding(
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                //Email Field
+                Padding(
                   padding: EdgeInsets.all(8.w),
-                  child: CustomButton(
-                    text: AppLocalizations.of(context)!.verifyOtpButton,
+                  child: CustomTextlabel(
+                    text: AppLocalizations.of(context)!.otpMessage,
                   ),
                 ),
-              ),
-            ],
+                Padding(
+                  padding: EdgeInsets.all(8.w),
+                  child: Form(
+                    key: globKey,
+                    child: CustomTextformfield(
+                      validator: (value) {
+                        if (value == null || value.length != 6) {
+                          return 'Enter the 6 digit code';
+                        }
+                        return null;
+                      },
+                      controller: otpController,
+                      bordercolor: AppThemes.redColor,
+                      text: '384591',
+                      fillcolor: AppThemes.whiteColor,
+                    ),
+                  ),
+                ),
+            
+                SizedBox(height: 10.h),
+                //  Verify OTP Button
+                GestureDetector(
+                  onTap: () async {
+                    if (globKey.currentState!.validate()) {
+                      await Auth().verifyOtp(
+                        widget.email,
+                        otpController.text,
+                        context,
+                      );
+                    }
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.all(8.w),
+                    child: CustomButton(
+                      text: AppLocalizations.of(context)!.verifyOtpButton,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -76,6 +76,14 @@ class _LoginUserScreenState extends State<LoginUserScreen> {
                       ),
                       SizedBox(height: 10.h),
                       CustomTextformfield(
+                        validator: (value) {
+                          if (value == null ||
+                              !value.contains('@') ||
+                              !value.contains('.')) {
+                            return 'Enter a valid email';
+                          }
+                          return null;
+                        },
                         controller: emailController,
                         bordercolor: AppThemes.redColor,
                         icon: Icons.email_outlined,
@@ -105,7 +113,7 @@ class _LoginUserScreenState extends State<LoginUserScreen> {
               //Forget Password
               GestureDetector(
                 onTap: () {
-                  context.go('/forgetPassword');
+                  context.push('/forgetPassword');
                 },
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 8.w),
@@ -126,14 +134,13 @@ class _LoginUserScreenState extends State<LoginUserScreen> {
                 child: GestureDetector(
                   onTap: () async {
                     if (globKey.currentState!.validate()) {
-                      await Auth().login(
-                        emailController.text,
+                      bool ok = await Auth().login(
+                        emailController.text.trim(),
                         passwordController.text,
                         context,
                       );
-
-                      if (Supabase.instance.client.auth.currentUser != null) {
-                        context.go("/splash");
+                      if (ok && mounted) {
+                        context.go('/splash');
                       }
                     }
                   },

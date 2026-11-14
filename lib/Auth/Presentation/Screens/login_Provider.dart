@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/Auth/Data/repo/auth.dart';
 import 'package:flutter_application_1/Auth/Presentation/Widgets/custom_Button.dart';
 import 'package:flutter_application_1/Auth/Presentation/Widgets/custom_appbar.dart';
 import 'package:flutter_application_1/Auth/Presentation/Widgets/custom_appbarText.dart';
+import 'package:flutter_application_1/Auth/Presentation/Widgets/custom_sentince.dart';
 import 'package:flutter_application_1/Auth/Presentation/Widgets/custom_textFormField.dart';
 import 'package:flutter_application_1/Auth/Presentation/Widgets/custom_textLabel.dart';
 import 'package:flutter_application_1/core/colors.dart';
 import 'package:flutter_application_1/l10n/app_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LoginProvider extends StatefulWidget {
   const LoginProvider({super.key});
@@ -72,32 +76,7 @@ class _LoginProviderState extends State<LoginProvider> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     spacing: 2.h,
                     children: [
-                      //Phone Field
-                      CustomTextlabel(
-                        text: AppLocalizations.of(context)!.phoneNumber,
-                      ),
-                      SizedBox(height: 8.h),
-                      CustomTextformfield(
-                        controller: phoneController,
-                        bordercolor: AppThemes.redColor,
-                        icon: Icons.phone_outlined,
-                        text: AppLocalizations.of(context)!.hintPhone,
-                        fillcolor: AppThemes.whiteColor,
-                      ),
-                      SizedBox(height: 10.h),
-
-                      //  Id Field
-                      CustomTextlabel(
-                        text: AppLocalizations.of(context)!.nationalId,
-                      ),
-                      SizedBox(height: 8.h),
-                      CustomTextformfield(
-                        controller: idController,
-                        bordercolor: AppThemes.redColor,
-                        icon: Icons.phone_outlined,
-                        text: '152341425723',
-                        fillcolor: AppThemes.whiteColor,
-                      ),
+                      //Email Field
                       SizedBox(height: 10.h),
 
                       // Email Field
@@ -107,6 +86,14 @@ class _LoginProviderState extends State<LoginProvider> {
                       SizedBox(height: 8.h),
 
                       CustomTextformfield(
+                        validator: (value) {
+                          if (value == null ||
+                              !value.contains('@') ||
+                              !value.contains('.')) {
+                            return 'Enter a valid email';
+                          }
+                          return null;
+                        },
                         controller: emailController,
                         bordercolor: AppThemes.redColor,
                         icon: Icons.email_outlined,
@@ -121,6 +108,7 @@ class _LoginProviderState extends State<LoginProvider> {
                       ),
                       SizedBox(height: 8.h),
                       CustomTextformfield(
+                        isPassword: true,
                         controller: passwordController,
                         bordercolor: AppThemes.redColor,
                         icon: Icons.visibility_off_outlined,
@@ -134,14 +122,19 @@ class _LoginProviderState extends State<LoginProvider> {
               ),
 
               //Forget Password
-              Padding(
-                      padding:  EdgeInsets.symmetric(horizontal: 8.w),
-                child: Text(
-                  AppLocalizations.of(context)!.forgotPasswordLink,
-                  style: TextStyle(
-                    color: AppThemes.redColor,
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.bold,
+              GestureDetector(
+                onTap: () {
+                  context.push('/forgetPassword');
+                },
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8.w),
+                  child: Text(
+                    AppLocalizations.of(context)!.forgotPasswordLink,
+                    style: TextStyle(
+                      color: AppThemes.redColor,
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
@@ -150,12 +143,69 @@ class _LoginProviderState extends State<LoginProvider> {
               // Login Button
               Padding(
                 padding: EdgeInsets.all(8.w),
-                child: CustomButton(
-                  text: AppLocalizations.of(context)!.loginButton,
+                child: GestureDetector(
+                  onTap: () async {
+                    if (globKey.currentState!.validate()) {
+                      bool ok = await Auth().login(
+                        emailController.text.trim(),
+                        passwordController.text,
+                        context,
+                      );
+                      if (ok && mounted) {
+                        context.go('/splash');
+                      }
+                    }
+                  },
+                  child: CustomButton(
+                    text: AppLocalizations.of(context)!.loginButton,
+                  ),
                 ),
               ),
 
               SizedBox(height: 8.h),
+
+              //  Privacy
+              Padding(
+                padding: EdgeInsets.all(8.w),
+                child: Container(
+                  padding: EdgeInsets.all(10),
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: AppThemes.privacyColor,
+                    borderRadius: BorderRadius.circular(10.r),
+                    border: Border.all(color: AppThemes.redColor, width: 1.r),
+                  ),
+                  child: Row(
+                    spacing: 2.h,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Image.asset(
+                        'images/shield-check.png',
+                        height: 25.h,
+                        width: 25.w,
+                      ),
+                      Expanded(
+                        child: CustomTextlabel(
+                          text: AppLocalizations.of(context)!.dataSecurityNote,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              SizedBox(height: 5.h),
+
+              //  New Account
+              CustomSentince(
+                onTap: () {
+                  context.go('/signUp');
+                },
+                text1: AppLocalizations.of(context)!.firstTimeHere,
+                text2: AppLocalizations.of(context)!.createNewAccount,
+              ),
+
+              SizedBox(height: 15.h),
 
               // CopyRight
               Padding(

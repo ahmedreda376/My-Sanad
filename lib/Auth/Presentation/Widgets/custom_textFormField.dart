@@ -10,7 +10,10 @@ class CustomTextformfield extends StatefulWidget {
     this.icon,
     required this.text,
     required this.fillcolor,
+    this.validator,
   });
+
+  final String? Function(String?)? validator;
 
   final TextEditingController controller;
   final Color bordercolor;
@@ -30,33 +33,35 @@ class _CustomTextformfieldState extends State<CustomTextformfield> {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-
       obscureText: widget.isPassword && isObsecure,
-      validator: (value) {
-        if (value!.isEmpty || value == "") {
-          return 'Field Is Reuired';
-        } else if (value.length < 3) {
-          return 'Must Be More Than 3';
-        }
-        return null;
-      },
+      validator:
+          widget.validator ??
+          (value) {
+            if (value == null || value.isEmpty) {
+              return 'Field Is Required';
+            } else if (value.length < 3) {
+              return 'Must Be More Than 3';
+            }
+            return null;
+          },
       controller: widget.controller,
       decoration: InputDecoration(
         filled: true,
         fillColor: widget.fillcolor,
         suffixIcon: widget.isPassword
-    ? IconButton(
-        onPressed: () {
-          setState(() {
-            isObsecure = !isObsecure;
-          });
-        },
-        icon: Icon(
-          isObsecure
-              ? Icons.visibility_off_outlined
-              : Icons.visibility_outlined,
-        ),
-      ): null ,
+            ? IconButton(
+                onPressed: () {
+                  setState(() {
+                    isObsecure = !isObsecure;
+                  });
+                },
+                icon: Icon(
+                  isObsecure
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
+                ),
+              )
+            : null,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.r),
           borderSide: BorderSide(width: 1.w, color: widget.bordercolor),

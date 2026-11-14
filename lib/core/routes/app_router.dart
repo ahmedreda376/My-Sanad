@@ -9,11 +9,15 @@ import 'package:flutter_application_1/Auth/Presentation/Screens/splash_Screen.da
 import 'package:go_router/go_router.dart';
 
 final GoRouter router = GoRouter(
-  initialLocation: '/loginUser',
+  initialLocation: '/loginProvider',
   routes: [
     GoRoute(path: '/splash', builder: (context, state) => SplashScreen()),
     GoRoute(path: '/signUp', builder: (context, state) => SignupScreen()),
-    GoRoute(path: '/otpScreen', builder: (context, state) => OtpScreen(email: state.extra as String,)),
+    GoRoute(
+      path: '/otpScreen',
+      builder: (context, state) =>
+          OtpScreen(email: (state.extra as String?) ?? ''),
+    ),
     GoRoute(path: '/newPassword', builder: (context, state) => NewPassword()),
     GoRoute(path: '/loginUser', builder: (context, state) => LoginUserScreen()),
     GoRoute(

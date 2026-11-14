@@ -61,6 +61,12 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                         child: Form(
                           key: globKey,
                           child: CustomTextformfield(
+                            validator: (value) {
+  if (value == null || !value.contains('@') || !value.contains('.')) {
+    return 'Enter a valid email';
+  }
+  return null;
+},
                             isPassword: false,
                             controller: emailController,
                             bordercolor: AppThemes.redColor,
@@ -76,10 +82,16 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                       GestureDetector(
                         onTap: () async {
                           if (globKey.currentState!.validate()) {
-                           await Auth().sendOtp(emailController.text.trim(), context);
-                            context.go('/otpScreen',
-                            extra: emailController.text.trim()
+                            bool ok = await Auth().sendOtp(
+                              emailController.text.trim(),
+                              context,
                             );
+                            if (ok && mounted) {
+                              context.push(
+                                '/otpScreen',
+                                extra: emailController.text.trim(),
+                              );
+                            }
                           }
                         },
                         child: Padding(

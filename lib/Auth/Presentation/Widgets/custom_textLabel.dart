@@ -10,7 +10,7 @@ class CustomTextlabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding:  EdgeInsets.symmetric(horizontal: 8.w),
+      padding: EdgeInsets.symmetric(horizontal: 8.w),
       child: Text(
         textAlign: TextAlign.start,
         text,
