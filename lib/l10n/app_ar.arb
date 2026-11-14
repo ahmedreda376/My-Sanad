@@ -32,6 +32,8 @@
   "forgotPasswordTitle": "نسيت كلمة المرور",
   "enterYourEmail": "ادخل الايميل", 
   "sendOtpButton": "إرسال رقم سري",
+  "verifyOtpButton": "تحقق من الرقم السري",
+
 
   "otpTitle": "إدخال رقمك",
   "otpMessage": "لقد أرسلنا رمز تأكيد مكونًا من 6 أرقام اليك  تأكد من إدخال الرمز الصحيح.",

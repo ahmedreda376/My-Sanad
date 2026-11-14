@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/Auth/Data/repo/auth.dart';
 import 'package:flutter_application_1/Auth/Presentation/Widgets/custom_Button.dart';
 import 'package:flutter_application_1/Auth/Presentation/Widgets/custom_appbar.dart';
 import 'package:flutter_application_1/Auth/Presentation/Widgets/custom_appbarText.dart';
@@ -8,6 +9,8 @@ import 'package:flutter_application_1/Auth/Presentation/Widgets/custom_textLabel
 import 'package:flutter_application_1/core/colors.dart';
 import 'package:flutter_application_1/l10n/app_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LoginUserScreen extends StatefulWidget {
   const LoginUserScreen({super.key});
@@ -19,13 +22,13 @@ class LoginUserScreen extends StatefulWidget {
 class _LoginUserScreenState extends State<LoginUserScreen> {
   final globKey = GlobalKey<FormState>();
 
-  final phoneController = TextEditingController();
+  final emailController = TextEditingController();
 
   final passwordController = TextEditingController();
 
   @override
   void dispose() {
-    phoneController.dispose();
+    emailController.dispose();
     passwordController.dispose();
     super.dispose();
   }
@@ -53,8 +56,9 @@ class _LoginUserScreenState extends State<LoginUserScreen> {
               CustomAppbartext(text: AppLocalizations.of(context)!.loginTitle),
 
               Padding(
-                padding:  EdgeInsets.symmetric(horizontal: 8.w),
-                child: Text(AppLocalizations.of(context)!.loginSubtitle,
+                padding: EdgeInsets.symmetric(horizontal: 8.w),
+                child: Text(
+                  AppLocalizations.of(context)!.loginSubtitle,
                   style: TextStyle(color: AppThemes.hiAccount),
                 ),
               ),
@@ -66,22 +70,27 @@ class _LoginUserScreenState extends State<LoginUserScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      //Phone Field
-                      CustomTextlabel(text: AppLocalizations.of(context)!.phoneNumber),
+                      //Email Field
+                      CustomTextlabel(
+                        text: AppLocalizations.of(context)!.email,
+                      ),
                       SizedBox(height: 10.h),
                       CustomTextformfield(
-                        controller: phoneController,
+                        controller: emailController,
                         bordercolor: AppThemes.redColor,
-                        icon: Icons.phone_outlined,
-                        text: '01135045965',
+                        icon: Icons.email_outlined,
+                        text: AppLocalizations.of(context)!.hintEmail,
                         fillcolor: AppThemes.whiteColor,
                       ),
                       SizedBox(height: 10.h),
                       //Password Field
-                      CustomTextlabel(text: AppLocalizations.of(context)!.password),
+                      CustomTextlabel(
+                        text: AppLocalizations.of(context)!.password,
+                      ),
                       SizedBox(height: 10.h),
-      
+
                       CustomTextformfield(
+                        isPassword: true,
                         controller: passwordController,
                         bordercolor: AppThemes.redColor,
                         icon: Icons.visibility_off_outlined,
@@ -92,25 +101,48 @@ class _LoginUserScreenState extends State<LoginUserScreen> {
                   ),
                 ),
               ),
-      
+
               //Forget Password
-              Padding(
-                padding:  EdgeInsets.symmetric(horizontal: 8.w),
-                child: Text(AppLocalizations.of(context)!.forgotPasswordLink,
-                  style: TextStyle(
-                    color: AppThemes.redColor,
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.bold,
+              GestureDetector(
+                onTap: () {
+                  context.go('/forgetPassword');
+                },
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8.w),
+                  child: Text(
+                    AppLocalizations.of(context)!.forgotPasswordLink,
+                    style: TextStyle(
+                      color: AppThemes.redColor,
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
-      
+
               // Login Button
               Padding(
                 padding: EdgeInsets.all(8.w),
-                child: CustomButton(text: AppLocalizations.of(context)!.loginButton),
+                child: GestureDetector(
+                  onTap: () async {
+                    if (globKey.currentState!.validate()) {
+                      await Auth().login(
+                        emailController.text,
+                        passwordController.text,
+                        context,
+                      );
+
+                      if (Supabase.instance.client.auth.currentUser != null) {
+                        context.go("/splash");
+                      }
+                    }
+                  },
+                  child: CustomButton(
+                    text: AppLocalizations.of(context)!.loginButton,
+                  ),
+                ),
               ),
-      
+
               SizedBox(height: 25.h),
               //  Privacy
               Padding(
@@ -134,25 +166,27 @@ class _LoginUserScreenState extends State<LoginUserScreen> {
                       ),
                       Expanded(
                         child: CustomTextlabel(
-                          text:
-                             AppLocalizations.of(context)!.dataSecurityNote,
+                          text: AppLocalizations.of(context)!.dataSecurityNote,
                         ),
                       ),
                     ],
                   ),
                 ),
               ),
-      
+
               SizedBox(height: 5.h),
-      
+
               //  New Account
               CustomSentince(
-                text1:AppLocalizations.of(context)!.firstTimeHere,
-                text2:AppLocalizations.of(context)!.createNewAccount,
+                onTap: () {
+                  context.go('/signUp');
+                },
+                text1: AppLocalizations.of(context)!.firstTimeHere,
+                text2: AppLocalizations.of(context)!.createNewAccount,
               ),
-      
+
               SizedBox(height: 15.h),
-      
+
               // CopyRight
               Padding(
                 padding: EdgeInsets.all(8.w),

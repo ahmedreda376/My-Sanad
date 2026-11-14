@@ -90,6 +90,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get sendOtpButton => 'إرسال رقم سري';
 
   @override
+  String get verifyOtpButton => 'تحقق من الرقم السري';
+
+  @override
   String get otpTitle => 'إدخال رقمك';
 
   @override

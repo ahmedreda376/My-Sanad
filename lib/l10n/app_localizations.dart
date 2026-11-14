@@ -257,6 +257,12 @@ abstract class AppLocalizations {
   /// **'Send code'**
   String get sendOtpButton;
 
+  /// No description provided for @verifyOtpButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify Your OTP'**
+  String get verifyOtpButton;
+
   /// No description provided for @otpTitle.
   ///
   /// In en, this message translates to:

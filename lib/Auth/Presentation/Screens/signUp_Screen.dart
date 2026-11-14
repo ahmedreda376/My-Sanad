@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/Auth/Data/repo/auth.dart';
+import 'package:flutter_application_1/Auth/Presentation/Manager/theme.dart';
 import 'package:flutter_application_1/Auth/Presentation/Widgets/custom_Button.dart';
 import 'package:flutter_application_1/Auth/Presentation/Widgets/custom_appbarText.dart';
 import 'package:flutter_application_1/Auth/Presentation/Widgets/custom_sentince.dart';
 import 'package:flutter_application_1/Auth/Presentation/Widgets/custom_textFormField.dart';
 import 'package:flutter_application_1/Auth/Presentation/Widgets/custom_textLabel.dart';
 import 'package:flutter_application_1/core/colors.dart';
+import 'package:flutter_application_1/core/widgets/custom_SnakBar.dart';
 import 'package:flutter_application_1/l10n/app_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
-
 
   @override
   State<SignupScreen> createState() => _SignupScreenState();
@@ -20,13 +25,9 @@ class _SignupScreenState extends State<SignupScreen> {
   final globKey = GlobalKey<FormState>();
 
   final nameController = TextEditingController();
-
-  final phoneController = TextEditingController();
-
+  final emailController = TextEditingController();
   final cityController = TextEditingController();
-
   final regionController = TextEditingController();
-
   final passwordController = TextEditingController();
 
   bool isChecked = false;
@@ -34,7 +35,7 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   void dispose() {
     nameController.dispose();
-    phoneController.dispose();
+    emailController.dispose();
     cityController.dispose();
     regionController.dispose();
     passwordController.dispose();
@@ -45,6 +46,7 @@ class _SignupScreenState extends State<SignupScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        backgroundColor: AppThemes.cremeyColor,
         appBar: AppBar(
           centerTitle: false,
           backgroundColor: AppThemes.cremeyColor,
@@ -52,7 +54,7 @@ class _SignupScreenState extends State<SignupScreen> {
             text: AppLocalizations.of(context)!.registerTitle,
           ),
         ),
-        backgroundColor: AppThemes.cremeyColor,
+
         body: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -62,11 +64,14 @@ class _SignupScreenState extends State<SignupScreen> {
                 padding: EdgeInsets.symmetric(horizontal: 20.w),
                 child: Text(
                   AppLocalizations.of(context)!.registerSubtitle,
-                  style: TextStyle(color: AppThemes.hiAccount),
+                  style: TextStyle(
+                    color: Theme.of(context).textTheme.bodyMedium!.color,
+                  ),
                 ),
               ),
 
               SizedBox(height: 20.h),
+
               Form(
                 key: globKey,
                 child: Padding(
@@ -74,7 +79,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      //Name Field
+                      // Name Field
                       CustomTextlabel(
                         text: AppLocalizations.of(context)!.fullName,
                       ),
@@ -86,27 +91,27 @@ class _SignupScreenState extends State<SignupScreen> {
                         text: AppLocalizations.of(context)!.hintFullName,
                         fillcolor: AppThemes.whiteColor,
                       ),
+
                       SizedBox(height: 15.h),
 
-                      //  Phone Field
+                      // Email Field
                       CustomTextlabel(
-                        text: AppLocalizations.of(context)!.phoneNumber,
+                        text: AppLocalizations.of(context)!.email,
                       ),
                       SizedBox(height: 10.h),
-
                       CustomTextformfield(
-                        controller: phoneController,
+                        controller: emailController,
                         bordercolor: AppThemes.redColor,
                         icon: Icons.phone_outlined,
-                        text: '01135045965',
+                        text: AppLocalizations.of(context)!.hintEmail,
                         fillcolor: AppThemes.whiteColor,
                       ),
+
                       SizedBox(height: 15.h),
 
                       // City Field
                       CustomTextlabel(text: AppLocalizations.of(context)!.city),
                       SizedBox(height: 10.h),
-
                       CustomTextformfield(
                         controller: cityController,
                         bordercolor: AppThemes.redColor,
@@ -116,7 +121,8 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
 
                       SizedBox(height: 15.h),
-                      //Region Field
+
+                      // Region Field
                       CustomTextlabel(text: AppLocalizations.of(context)!.area),
                       SizedBox(height: 10.h),
                       CustomTextformfield(
@@ -128,12 +134,14 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
 
                       SizedBox(height: 15.h),
-                      //Password Field
+
+                      // Password Field
                       CustomTextlabel(
                         text: AppLocalizations.of(context)!.password,
                       ),
                       SizedBox(height: 10.h),
                       CustomTextformfield(
+                        isPassword: true,
                         controller: passwordController,
                         bordercolor: AppThemes.redColor,
                         icon: Icons.visibility_off_outlined,
@@ -146,7 +154,8 @@ class _SignupScreenState extends State<SignupScreen> {
               ),
 
               SizedBox(height: 15.h),
-              //Piracy Password
+
+              // Privacy Checkbox
               Row(
                 children: [
                   Checkbox(
@@ -177,8 +186,31 @@ class _SignupScreenState extends State<SignupScreen> {
               // Create Account Button
               Padding(
                 padding: EdgeInsets.all(8.w),
-                child: CustomButton(
-                  text: AppLocalizations.of(context)!.createAccountButton,
+                child: GestureDetector(
+                  onTap: () async {
+                    if (globKey.currentState!.validate()) {
+                      if (!isChecked) {
+                        customSnakbar(
+                          context,
+                          'Please Accept Privacy Policy',
+                          Colors.red,
+                        );
+                        return;
+                      }
+                      await Auth().signup(
+                        nameController.text,
+                        emailController.text,
+                        cityController.text,
+                        regionController.text,
+                        passwordController.text,
+                        context,
+                      );
+                      context.go('/loginUser');
+                    }
+                  },
+                  child: CustomButton(
+                    text: AppLocalizations.of(context)!.createAccountButton,
+                  ),
                 ),
               ),
 
@@ -188,6 +220,7 @@ class _SignupScreenState extends State<SignupScreen> {
               Padding(
                 padding: EdgeInsets.all(8.w),
                 child: CustomSentince(
+                  onTap: () => context.go('/loginUser'),
                   text1: AppLocalizations.of(context)!.haveAccount,
                   text2: AppLocalizations.of(context)!.loginButton,
                 ),

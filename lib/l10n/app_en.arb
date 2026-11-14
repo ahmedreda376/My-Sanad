@@ -32,6 +32,8 @@
   "forgotPasswordTitle": "Forgot password",
   "enterYourEmail": "Enter your Email ",
   "sendOtpButton": "Send code",
+  "verifyOtpButton": "Verify Your OTP",
+
 
   "otpTitle": "Enter your code",
   "otpMessage": "We sent a 6-digit verification code to You Make sure you enter the correct code.",

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/Auth/Data/repo/auth.dart';
 import 'package:flutter_application_1/Auth/Presentation/Widgets/custom_Button.dart';
 import 'package:flutter_application_1/Auth/Presentation/Widgets/custom_appbarText.dart';
 import 'package:flutter_application_1/Auth/Presentation/Widgets/custom_textFormField.dart';
@@ -6,10 +7,11 @@ import 'package:flutter_application_1/Auth/Presentation/Widgets/custom_textLabel
 import 'package:flutter_application_1/core/colors.dart';
 import 'package:flutter_application_1/l10n/app_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
 class OtpScreen extends StatefulWidget {
-  const OtpScreen({super.key});
-
+  const OtpScreen({super.key, required this.email});
+  final String email;
   @override
   State<OtpScreen> createState() => _OtpScreenState();
 }
@@ -45,8 +47,7 @@ class _OtpScreenState extends State<OtpScreen> {
               Padding(
                 padding: EdgeInsets.all(8.w),
                 child: CustomTextlabel(
-                  text:
-                   AppLocalizations.of(context)!.otpMessage,
+                  text: AppLocalizations.of(context)!.otpMessage,
                 ),
               ),
               Padding(
@@ -63,10 +64,23 @@ class _OtpScreenState extends State<OtpScreen> {
               ),
 
               SizedBox(height: 10.h),
-              //  Send OTP Button
-              Padding(
-                padding: EdgeInsets.all(8.w),
-                child: CustomButton(text: AppLocalizations.of(context)!.sendOtpButton),
+              //  Verify OTP Button
+              GestureDetector(
+                onTap: () async {
+                  if (globKey.currentState!.validate()) {
+                    await Auth().verifyOtp(
+                      widget.email,
+                      otpController.text,
+                      context,
+                    );
+                  }
+                },
+                child: Padding(
+                  padding: EdgeInsets.all(8.w),
+                  child: CustomButton(
+                    text: AppLocalizations.of(context)!.verifyOtpButton,
+                  ),
+                ),
               ),
             ],
           ),

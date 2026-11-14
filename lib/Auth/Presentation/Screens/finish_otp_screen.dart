@@ -4,6 +4,7 @@ import 'package:flutter_application_1/Auth/Presentation/Widgets/custom_sentince.
 import 'package:flutter_application_1/core/colors.dart';
 import 'package:flutter_application_1/l10n/app_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
 class FinishOtpScreen extends StatelessWidget {
   const FinishOtpScreen({super.key});
@@ -17,14 +18,24 @@ class FinishOtpScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             CustomSentince(
+              onTap: () {
+                context.go('/loginUser');
+              },
               text1: AppLocalizations.of(context)!.passwordResetSuccessPrefix,
-              text2:  AppLocalizations.of(context)!.loginButton,
+              text2: AppLocalizations.of(context)!.loginButton,
             ),
             SizedBox(height: 10.h),
-      
-            Padding(
-              padding:  EdgeInsets.all(8.w),
-              child: CustomButton(text:  AppLocalizations.of(context)!.goToLoginButton),
+
+            GestureDetector(
+              onTap: () {
+                context.go('/loginUser');
+              },
+              child: Padding(
+                padding: EdgeInsets.all(8.w),
+                child: CustomButton(
+                  text: AppLocalizations.of(context)!.goToLoginButton,
+                ),
+              ),
             ),
           ],
         ),

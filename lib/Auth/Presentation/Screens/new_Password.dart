@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/Auth/Data/repo/auth.dart';
 import 'package:flutter_application_1/Auth/Presentation/Widgets/custom_Button.dart';
 import 'package:flutter_application_1/Auth/Presentation/Widgets/custom_appbarText.dart';
 import 'package:flutter_application_1/Auth/Presentation/Widgets/custom_textFormField.dart';
@@ -15,16 +16,13 @@ class NewPassword extends StatefulWidget {
 }
 
 class _NewPasswordState extends State<NewPassword> {
-  final passControllerOne = TextEditingController();
-
-  final passControllerTwo = TextEditingController();
+  final passController = TextEditingController();
 
   final globKey = GlobalKey<FormState>();
 
   @override
   void dispose() {
-    passControllerOne.dispose();
-    passControllerTwo.dispose();
+    passController.dispose();
     super.dispose();
   }
 
@@ -36,72 +34,72 @@ class _NewPasswordState extends State<NewPassword> {
         appBar: AppBar(
           centerTitle: false,
           backgroundColor: AppThemes.cremeyColor,
-          title: CustomAppbartext(text: AppLocalizations.of(context)!.newPasswordTitle),
+          title: CustomAppbartext(
+            text: AppLocalizations.of(context)!.newPasswordTitle,
+          ),
         ),
         body: LayoutBuilder(
           builder: (context, constraints) {
-            
             return SingleChildScrollView(
-              
-              child: ConstrainedBox(constraints: BoxConstraints(
-                minHeight: constraints.maxHeight
-              ),
-              child: Center(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    //Email Field
-                    Padding(
-                      padding: EdgeInsets.all(8.w),
-                      child: CustomTextlabel(
-                        text: AppLocalizations.of(context)!.enterNewPassword
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.all(8.w),
-                      child: Form(
-                        key: globKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            //password 1
-                            CustomTextformfield(
-                              controller: passControllerOne,
-                              bordercolor: AppThemes.redColor,
-                              fillcolor: AppThemes.whiteColor,
-                              icon: Icons.visibility_off_outlined,
-                              text: '••••••••',
-                            ),
-                            SizedBox(height: 20.h),
-
-                            //  password 2
-                            CustomTextlabel(text: AppLocalizations.of(context)!.confirmPassword),
-                            SizedBox(height: 10.h),
-                            CustomTextformfield(
-                              controller: passControllerTwo,
-                              bordercolor: AppThemes.redColor,
-                              fillcolor: AppThemes.whiteColor,
-                              icon: Icons.visibility_off_outlined,
-                              text: '••••••••',
-                            ),
-                          ],
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Center(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      //Email Field
+                      Padding(
+                        padding: EdgeInsets.all(8.w),
+                        child: CustomTextlabel(
+                          text: AppLocalizations.of(context)!.enterNewPassword,
                         ),
                       ),
-                    ),
+                      Padding(
+                        padding: EdgeInsets.all(8.w),
+                        child: Form(
+                          key: globKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              //password
+                              CustomTextformfield(
+                                isPassword: true,
+                                controller: passController,
+                                bordercolor: AppThemes.redColor,
+                                fillcolor: AppThemes.whiteColor,
+                                icon: Icons.visibility_off_outlined,
+                                text: '••••••••',
+                              ),
+                              SizedBox(height: 20.h),
+                            ],
+                          ),
+                        ),
+                      ),
 
-                    SizedBox(height: 10.h),
-                    //Done Button
-                    Padding(
-                      padding:  EdgeInsets.all(8.w),
-                      child: CustomButton(text: AppLocalizations.of(context)!.doneButton),
-                    ),
-                  ],
+                      SizedBox(height: 10.h),
+                      //Done Button
+                      GestureDetector(
+                        onTap: () async {
+                          if (globKey.currentState!.validate()) {
+                            await Auth().resetPassword(
+                              passController.text.trim(),
+                              context,
+                            );
+                          }
+                        },
+                        child: Padding(
+                          padding: EdgeInsets.all(8.w),
+                          child: CustomButton(
+                            text: AppLocalizations.of(context)!.doneButton,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              ),
-              
             );
           },
         ),

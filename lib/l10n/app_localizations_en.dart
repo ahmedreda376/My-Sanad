@@ -90,6 +90,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sendOtpButton => 'Send code';
 
   @override
+  String get verifyOtpButton => 'Verify Your OTP';
+
+  @override
   String get otpTitle => 'Enter your code';
 
   @override

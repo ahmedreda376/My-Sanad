@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/Auth/Data/repo/auth.dart';
 import 'package:flutter_application_1/Auth/Presentation/Widgets/custom_Button.dart';
 import 'package:flutter_application_1/Auth/Presentation/Widgets/custom_appbarText.dart';
 import 'package:flutter_application_1/Auth/Presentation/Widgets/custom_textFormField.dart';
@@ -6,6 +7,7 @@ import 'package:flutter_application_1/Auth/Presentation/Widgets/custom_textLabel
 import 'package:flutter_application_1/core/colors.dart';
 import 'package:flutter_application_1/l10n/app_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
 class ForgetPassword extends StatefulWidget {
   const ForgetPassword({super.key});
@@ -34,7 +36,9 @@ class _ForgetPasswordState extends State<ForgetPassword> {
         appBar: AppBar(
           centerTitle: false,
           backgroundColor: AppThemes.cremeyColor,
-          title: CustomAppbartext(text: AppLocalizations.of(context)!.forgotPasswordTitle),
+          title: CustomAppbartext(
+            text: AppLocalizations.of(context)!.forgotPasswordTitle,
+          ),
         ),
         body: LayoutBuilder(
           builder: (context, constraints) {
@@ -43,36 +47,50 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                 constraints: BoxConstraints(minHeight: constraints.maxHeight),
                 child: Center(
                   child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              //Email Field
-              Padding(
-                padding: EdgeInsets.all(8.w),
-                child: CustomTextlabel(text:AppLocalizations.of(context)!.enterYourEmail ),
-              ),
-              Padding(
-                padding: EdgeInsets.all(8.w),
-                child: Form(
-                  key: globKey,
-                  child: CustomTextformfield(
-                    controller: emailController,
-                    bordercolor: AppThemes.redColor,
-                    text: 'example@gmail.com',
-                    icon: Icons.email_outlined,
-                    fillcolor: AppThemes.whiteColor,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      //Email Field
+                      Padding(
+                        padding: EdgeInsets.all(8.w),
+                        child: CustomTextlabel(
+                          text: AppLocalizations.of(context)!.enterYourEmail,
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.all(8.w),
+                        child: Form(
+                          key: globKey,
+                          child: CustomTextformfield(
+                            isPassword: false,
+                            controller: emailController,
+                            bordercolor: AppThemes.redColor,
+                            text: 'example@gmail.com',
+                            icon: Icons.email_outlined,
+                            fillcolor: AppThemes.whiteColor,
+                          ),
+                        ),
+                      ),
+
+                      SizedBox(height: 10.h),
+                      //  Send OTP Button
+                      GestureDetector(
+                        onTap: () async {
+                          if (globKey.currentState!.validate()) {
+                           await Auth().sendOtp(emailController.text.trim(), context);
+                            context.go('/otpScreen',
+                            extra: emailController.text.trim()
+                            );
+                          }
+                        },
+                        child: Padding(
+                          padding: EdgeInsets.all(8.w),
+                          child: CustomButton(
+                            text: AppLocalizations.of(context)!.sendOtpButton,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ),
-                      
-              SizedBox(height: 10.h),
-              //  Send OTP Button
-              Padding(
-                padding: EdgeInsets.all(8.w),
-                child: CustomButton(text: AppLocalizations.of(context)!.sendOtpButton),
-              ),
-            ],
-             
-          ),
                 ),
               ),
             );
