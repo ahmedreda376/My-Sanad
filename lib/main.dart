@@ -1,4 +1,4 @@
-import 'package:device_preview/device_preview.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/Auth/Presentation/Manager/theme.dart';
 
@@ -16,7 +16,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Supabase.initialize(url: 'https://kdzvfetkbgicvfgedpuc.supabase.co', 
   publishableKey: 'sb_publishable_r3XiLkp2Ny-9pay-MbEtBg_1mY4Z1TT');
-  runApp(DevicePreview(builder: (context) => const MyApp()));
+  runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {
@@ -35,7 +35,6 @@ class _MyAppState extends State<MyApp> {
       splitScreenMode: true,
       child: MaterialApp.router(
         locale: Locale('ar'),
-        builder: DevicePreview.appBuilder,
         debugShowCheckedModeBanner: false,
         localizationsDelegates: [
           AppLocalizations.delegate,
