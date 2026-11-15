@@ -6,27 +6,51 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class Auth {
   final supa = Supabase.instance.client.auth;
 
-  // Login
-  Future<bool> login(
-    String email,
-    String password,
-    BuildContext context,
-  ) async {
-    try {
-      await supa.signInWithPassword(email: email, password: password);
-      if (!context.mounted) return false;
-      customSnakbar(context, 'Success', Colors.green);
-      return true;
-    } on AuthException catch (e) {
-      if (!context.mounted) return false;
-      customSnakbar(context, e.message, Colors.red);
-      return false;
-    } catch (e) {
-      if (!context.mounted) return false;
-      customSnakbar(context, 'Failed To Login', Colors.red);
-      return false;
+
+// Login
+Future<bool> login(
+  String email,
+  String password,
+  BuildContext context,
+) async {
+  try {
+    await supa.signInWithPassword(email: email, password: password);
+    if (!context.mounted) return false;
+    return true;
+  } on AuthException catch (e) {
+    if (!context.mounted) return false;
+
+    String message;
+    if (e.code == 'invalid_credentials' ||
+        e.message.toLowerCase().contains('invalid login credentials')) {
+      message = 'Incorrect email or password.';
+    } else if (e.code == 'email_not_confirmed' ||
+        e.message.toLowerCase().contains('email not confirmed')) {
+      message = 'Please confirm your email first. Check your inbox.';
+    } else {
+      message = 'Login failed. Please try again.';
     }
+
+    customSnakbar(context, message, Colors.red);
+    return false;
+  } catch (e) {
+    if (!context.mounted) return false;
+    customSnakbar(
+      context,
+      'Login failed. Please check your connection and try again.',
+      Colors.red,
+    );
+    return false;
   }
+}
+
+
+
+
+
+
+
+
 
   // SignUp
   Future<bool> signup(
@@ -38,7 +62,7 @@ class Auth {
     BuildContext context,
   ) async {
     try {
-      await supa.signUp(
+      final res = await supa.signUp(
         password: password,
         email: email,
         data: {'name': name, 'city': city, 'region': region},
@@ -46,20 +70,34 @@ class Auth {
 
       if (!context.mounted) return false;
 
-      customSnakbar(context, 'Success', Colors.green);
+      // إيميل متسجل قبل كده
+      if (res.user != null && (res.user!.identities?.isEmpty ?? false)) {
+        customSnakbar(
+          context,
+          'This email is already registered. Try logging in instead.',
+          Colors.red,
+        );
+        return false;
+      }
+
+      customSnakbar(
+        context,
+        'Account created. Please check your email to confirm it.',
+        Colors.green,
+      );
 
       return true;
     } on AuthException catch (e) {
       if (!context.mounted) return false;
-
       customSnakbar(context, e.message, Colors.red);
-
       return false;
     } catch (e) {
       if (!context.mounted) return false;
-
-      customSnakbar(context, 'Failed To SignUp', Colors.red);
-
+      customSnakbar(
+        context,
+        'Sign up failed. Please check your connection and try again.',
+        Colors.red,
+      );
       return false;
     }
   }
@@ -70,7 +108,7 @@ class Auth {
       await supa.resetPasswordForEmail(email);
       if (!context.mounted) return false;
 
-      customSnakbar(context, 'Success', Colors.green);
+      customSnakbar(context, 'We sent a code to your email', Colors.green);
 
       return true;
     } on AuthException catch (e) {
@@ -82,7 +120,11 @@ class Auth {
     } catch (e) {
       if (!context.mounted) return false;
 
-      customSnakbar(context, 'Failed To Send OTP', Colors.red);
+      customSnakbar(
+        context,
+        'Could not send the code. Please check your connection and try again.',
+        Colors.red,
+      );
 
       return false;
     }
@@ -92,24 +134,39 @@ class Auth {
   Future<void> verifyOtp(String email, String otp, BuildContext context) async {
     try {
       await supa.verifyOTP(email: email, token: otp, type: OtpType.recovery);
+      if (!context.mounted) return;
       context.go('/newPassword');
     } on AuthException catch (e) {
+      if (!context.mounted) return;
       customSnakbar(context, e.message, Colors.red);
     } catch (e) {
-      customSnakbar(context, 'Failed To Verify OTP', Colors.red);
+      if (!context.mounted) return;
+      customSnakbar(
+        context,
+        'Could not verify the code. Please check your connection and try again.',
+        Colors.red,
+      );
     }
   }
 
   // Reset Password
-  resetPassword(String newpass, BuildContext context) async {
+  Future<void> resetPassword(String newpass, BuildContext context) async {
     try {
       await supa.updateUser(UserAttributes(password: newpass));
-      customSnakbar(context, "Password Updated Successfully", Colors.green);
+      await supa.signOut();
+      if (!context.mounted) return;
+      customSnakbar(context, 'Password updated successfully', Colors.green);
       context.go('/finishOtp');
     } on AuthException catch (e) {
+      if (!context.mounted) return;
       customSnakbar(context, e.message, Colors.red);
     } catch (e) {
-      customSnakbar(context, 'Failed To Update Password', Colors.red);
+      if (!context.mounted) return;
+      customSnakbar(
+        context,
+        'Could not update your password. Please check your connection and try again.',
+        Colors.red,
+      );
     }
   }
 }

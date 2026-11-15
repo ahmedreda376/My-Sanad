@@ -18,8 +18,9 @@ class ForgetPassword extends StatefulWidget {
 
 class _ForgetPasswordState extends State<ForgetPassword> {
   final emailController = TextEditingController();
-
   final globKey = GlobalKey<FormState>();
+
+  bool isLoading = false;
 
   @override
   void dispose() {
@@ -27,12 +28,24 @@ class _ForgetPasswordState extends State<ForgetPassword> {
     super.dispose();
   }
 
+  Future<void> _sendOtp() async {
+    if (isLoading) return;
+    if (!globKey.currentState!.validate()) return;
+
+    setState(() => isLoading = true);
+    final email = emailController.text.trim();
+    final ok = await Auth().sendOtp(email, context);
+    if (!mounted) return;
+    setState(() => isLoading = false);
+
+    if (ok) context.push('/otpScreen', extra: email);
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
         backgroundColor: AppThemes.cremeyColor,
-        //AppBar
         appBar: AppBar(
           centerTitle: false,
           backgroundColor: AppThemes.cremeyColor,
@@ -49,7 +62,6 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      //Email Field
                       Padding(
                         padding: EdgeInsets.all(8.w),
                         child: CustomTextlabel(
@@ -61,12 +73,8 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                         child: Form(
                           key: globKey,
                           child: CustomTextformfield(
-                            validator: (value) {
-  if (value == null || !value.contains('@') || !value.contains('.')) {
-    return 'Enter a valid email';
-  }
-  return null;
-},
+                            validator: Validators.email,
+                            keyboardType: TextInputType.emailAddress,
                             isPassword: false,
                             controller: emailController,
                             bordercolor: AppThemes.redColor,
@@ -76,28 +84,14 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                           ),
                         ),
                       ),
-
                       SizedBox(height: 10.h),
-                      //  Send OTP Button
                       GestureDetector(
-                        onTap: () async {
-                          if (globKey.currentState!.validate()) {
-                            bool ok = await Auth().sendOtp(
-                              emailController.text.trim(),
-                              context,
-                            );
-                            if (ok && mounted) {
-                              context.push(
-                                '/otpScreen',
-                                extra: emailController.text.trim(),
-                              );
-                            }
-                          }
-                        },
+                        onTap: _sendOtp,
                         child: Padding(
                           padding: EdgeInsets.all(8.w),
                           child: CustomButton(
                             text: AppLocalizations.of(context)!.sendOtpButton,
+                            isLoading: isLoading,
                           ),
                         ),
                       ),

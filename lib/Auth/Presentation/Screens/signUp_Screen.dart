@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/Auth/Data/repo/auth.dart';
-import 'package:flutter_application_1/Auth/Presentation/Manager/theme.dart';
 import 'package:flutter_application_1/Auth/Presentation/Widgets/custom_Button.dart';
 import 'package:flutter_application_1/Auth/Presentation/Widgets/custom_appbarText.dart';
 import 'package:flutter_application_1/Auth/Presentation/Widgets/custom_sentince.dart';
@@ -11,8 +10,6 @@ import 'package:flutter_application_1/core/widgets/custom_SnakBar.dart';
 import 'package:flutter_application_1/l10n/app_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -31,6 +28,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final passwordController = TextEditingController();
 
   bool isChecked = false;
+  bool isLoading = false;
 
   @override
   void dispose() {
@@ -40,6 +38,30 @@ class _SignupScreenState extends State<SignupScreen> {
     regionController.dispose();
     passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _signup() async {
+    if (isLoading) return;
+    if (!globKey.currentState!.validate()) return;
+
+    if (!isChecked) {
+      customSnakbar(context, 'Please Accept Privacy Policy', Colors.red);
+      return;
+    }
+
+    setState(() => isLoading = true);
+    final ok = await Auth().signup(
+      nameController.text.trim(),
+      emailController.text.trim(),
+      cityController.text.trim(),
+      regionController.text.trim(),
+      passwordController.text,
+      context,
+    );
+    if (!mounted) return;
+    setState(() => isLoading = false);
+
+    if (ok) context.go('/loginUser');
   }
 
   @override
@@ -54,7 +76,6 @@ class _SignupScreenState extends State<SignupScreen> {
             text: AppLocalizations.of(context)!.registerTitle,
           ),
         ),
-
         body: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -69,9 +90,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
               ),
-
               SizedBox(height: 20.h),
-
               Form(
                 key: globKey,
                 child: Padding(
@@ -79,74 +98,61 @@ class _SignupScreenState extends State<SignupScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Name Field
                       CustomTextlabel(
                         text: AppLocalizations.of(context)!.fullName,
                       ),
                       SizedBox(height: 10.h),
                       CustomTextformfield(
+                        validator: Validators.name,
                         controller: nameController,
                         bordercolor: AppThemes.redColor,
                         icon: Icons.person,
                         text: AppLocalizations.of(context)!.hintFullName,
                         fillcolor: AppThemes.whiteColor,
                       ),
-
                       SizedBox(height: 15.h),
-
-                      // Email Field
                       CustomTextlabel(
                         text: AppLocalizations.of(context)!.email,
                       ),
                       SizedBox(height: 10.h),
                       CustomTextformfield(
+                        validator: Validators.email,
+                        keyboardType: TextInputType.emailAddress,
                         controller: emailController,
                         bordercolor: AppThemes.redColor,
                         icon: Icons.email_outlined,
                         text: AppLocalizations.of(context)!.hintEmail,
                         fillcolor: AppThemes.whiteColor,
                       ),
-
                       SizedBox(height: 15.h),
-
-                      // City Field
                       CustomTextlabel(text: AppLocalizations.of(context)!.city),
                       SizedBox(height: 10.h),
                       CustomTextformfield(
+                        validator: Validators.city,
                         controller: cityController,
                         bordercolor: AppThemes.redColor,
                         icon: Icons.location_on_outlined,
                         text: AppLocalizations.of(context)!.hintCity,
                         fillcolor: AppThemes.whiteColor,
                       ),
-
                       SizedBox(height: 15.h),
-
-                      // Region Field
                       CustomTextlabel(text: AppLocalizations.of(context)!.area),
                       SizedBox(height: 10.h),
                       CustomTextformfield(
+                        validator: Validators.area,
                         controller: regionController,
                         bordercolor: AppThemes.redColor,
                         icon: Icons.location_on_outlined,
                         text: AppLocalizations.of(context)!.hintArea,
                         fillcolor: AppThemes.whiteColor,
                       ),
-
                       SizedBox(height: 15.h),
-
-                      // Password Field
                       CustomTextlabel(
                         text: AppLocalizations.of(context)!.password,
                       ),
                       SizedBox(height: 10.h),
                       CustomTextformfield(
-                        validator: (value) {
-                          if (value == null || value.length < 8) {
-                            return 'Password must be at least 8 characters';
-                          }
-                          return null;
-                        },
+                        validator: Validators.password,
                         isPassword: true,
                         controller: passwordController,
                         bordercolor: AppThemes.redColor,
@@ -158,10 +164,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
               ),
-
               SizedBox(height: 15.h),
-
-              // Privacy Checkbox
               Row(
                 children: [
                   Checkbox(
@@ -188,43 +191,17 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ],
               ),
-
-              // Create Account Button
               Padding(
                 padding: EdgeInsets.all(8.w),
                 child: GestureDetector(
-                  onTap: () async {
-                    if (globKey.currentState!.validate()) {
-                      if (!isChecked) {
-                        customSnakbar(
-                          context,
-                          'Please Accept Privacy Policy',
-                          Colors.red,
-                        );
-                        return;
-                      }
-                      bool ok = await Auth().signup(
-                        nameController.text.trim(),
-                        emailController.text.trim(),
-                        cityController.text.trim(),
-                        regionController.text.trim(),
-                        passwordController.text,
-                        context,
-                      );
-                      if (ok && mounted) {
-                        context.push('/loginUser');
-                      }
-                    }
-                  },
+                  onTap: _signup,
                   child: CustomButton(
                     text: AppLocalizations.of(context)!.createAccountButton,
+                    isLoading: isLoading,
                   ),
                 ),
               ),
-
               SizedBox(height: 10.h),
-
-              // Do You Have Account
               Padding(
                 padding: EdgeInsets.all(8.w),
                 child: CustomSentince(

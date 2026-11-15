@@ -17,13 +17,24 @@ class NewPassword extends StatefulWidget {
 
 class _NewPasswordState extends State<NewPassword> {
   final passController = TextEditingController();
-
   final globKey = GlobalKey<FormState>();
+
+  bool isLoading = false;
 
   @override
   void dispose() {
     passController.dispose();
     super.dispose();
+  }
+
+  Future<void> _reset() async {
+    if (isLoading) return;
+    if (!globKey.currentState!.validate()) return;
+
+    setState(() => isLoading = true);
+    await Auth().resetPassword(passController.text, context);
+    if (!mounted) return;
+    setState(() => isLoading = false);
   }
 
   @override
@@ -49,7 +60,6 @@ class _NewPasswordState extends State<NewPassword> {
                     mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      //Email Field
                       Padding(
                         padding: EdgeInsets.all(8.w),
                         child: CustomTextlabel(
@@ -63,14 +73,8 @@ class _NewPasswordState extends State<NewPassword> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              //password
                               CustomTextformfield(
-                                validator: (value) {
-                                  if (value == null || value.length < 8) {
-                                    return 'Password must be at least 8 characters';
-                                  }
-                                  return null;
-                                },
+                                validator: Validators.password,
                                 isPassword: true,
                                 controller: passController,
                                 bordercolor: AppThemes.redColor,
@@ -83,22 +87,14 @@ class _NewPasswordState extends State<NewPassword> {
                           ),
                         ),
                       ),
-
                       SizedBox(height: 10.h),
-                      //Done Button
                       GestureDetector(
-                        onTap: () async {
-                          if (globKey.currentState!.validate()) {
-                            await Auth().resetPassword(
-                              passController.text.trim(),
-                              context,
-                            );
-                          }
-                        },
+                        onTap: _reset,
                         child: Padding(
                           padding: EdgeInsets.all(8.w),
                           child: CustomButton(
                             text: AppLocalizations.of(context)!.doneButton,
+                            isLoading: isLoading,
                           ),
                         ),
                       ),

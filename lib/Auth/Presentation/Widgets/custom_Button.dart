@@ -3,9 +3,14 @@ import 'package:flutter_application_1/core/colors.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class CustomButton extends StatelessWidget {
-  const CustomButton({super.key, required this.text});
+  const CustomButton({
+    super.key,
+    required this.text,
+    this.isLoading = false,
+  });
 
-  final String text; 
+  final String text;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -17,15 +22,24 @@ class CustomButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(10.r),
         color: AppThemes.redColor,
       ),
-      child: Text(
-          textAlign: TextAlign.start,
-        text,
-        style: TextStyle(
-          color: AppThemes.cremeyColor,
-          fontSize: 20.sp,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
+      child: isLoading
+          ? SizedBox(
+              height: 24.h,
+              width: 24.h,
+              child: CircularProgressIndicator(
+                strokeWidth: 3,
+                color: AppThemes.cremeyColor,
+              ),
+            )
+          : Text(
+              text,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: AppThemes.cremeyColor,
+                fontSize: 20.sp,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
     );
   }
 }
